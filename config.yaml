@@ -1,0 +1,37 @@
+# Select backend: "ollama" or "huggingface"
+backend: ollama
+
+# Common generation params (applied if supported by backend)
+params:
+  temperature: 0.2
+  top_p: 0.9
+  max_tokens: 1024
+  seed: 7
+
+# Model names per backend
+models:
+  ollama: "phi4:latest"      # e.g., phi4, phi4:14b, qwen:14b-instruct, mistral-nemo, llama3.3:70b-instruct
+  huggingface: "microsoft/phi-4" # swap to any HF chat/instruct model
+
+# Files (no hardcoded prompts)
+prompts:
+  system: ./prompts/system.txt
+  tools: ./prompts/tools.md # optional; you can remove if unused
+
+# Memory store (embedding-based recall only)
+memory:
+  dbname: parthdb
+  user: parth_user
+  password: Owlfitter
+  host: localhost
+  session_id: default
+
+# Ollama settings
+ollama:
+  host: "http://127.0.0.1:11434"
+
+# Hugging Face (only used if backend = huggingface)
+huggingface:
+  dtype: "auto" # or float16/bfloat16
+  device: "auto" # "cuda", "cpu", or index like "cuda:0"
+  trust_remote_code: false # set to true if using custom models with custom code
