@@ -12,6 +12,7 @@ params:
 models:
   ollama: "phi4:latest"      # e.g., phi4, phi4:14b, qwen:14b-instruct, mistral-nemo, llama3.3:70b-instruct
   huggingface: "microsoft/phi-4" # swap to any HF chat/instruct model
+  embedding: BAAI/bge-m3 
 
 # Files (no hardcoded prompts)
 prompts:
@@ -25,6 +26,7 @@ memory:
   password: Owlfitter
   host: localhost
   session_id: default
+  embedding_dim: 1024 
 
 # Ollama settings
 ollama:

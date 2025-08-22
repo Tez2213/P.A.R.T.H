@@ -4,12 +4,7 @@ from .prompt_manager import PromptManager
 from .memory import PostgresMemory  
 from llm.base import Message
 from llm.ollama_client import OllamaClient
-from llm.hf_client import HFClient
-
-_BACKENDS = {
-    "ollama": OllamaClient,
-    "huggingface": HFClient,
-}
+from sentence_transformers import SentenceTransformer
 
 
 class ChatRunner:
@@ -20,7 +15,7 @@ class ChatRunner:
             tools_path=self.cfg["prompts"].get("tools"),
         )
 
-        # Postgres memory (embedding only)
+        # Postgres memory (embedding_dim = 1024 for BGE-M3)
         mem_cfg = self.cfg["memory"]
         self.mem = PostgresMemory(
             dbname=mem_cfg["dbname"],
@@ -28,28 +23,22 @@ class ChatRunner:
             password=mem_cfg["password"],
             host=mem_cfg.get("host", "localhost"),
             session_id=mem_cfg.get("session_id", "default"),
+            embedding_dim=1024
         )
 
-        # Choose backend
-        backend = self.cfg.get("backend", "ollama")
-        params = self.cfg.get("params", {})
-        if backend == "ollama":
-            self.llm = _BACKENDS[backend](
-                model=self.cfg["models"]["ollama"],
-                host=self.cfg["ollama"]["host"],
-                params=params,
-            )
-        elif backend == "huggingface":
-            hf = self.cfg["huggingface"]
-            self.llm = _BACKENDS[backend](
-                model=self.cfg["models"]["huggingface"],
-                params=params,
-                device=hf.get("device", "auto"),
-                dtype=hf.get("dtype", "auto"),
-                trust_remote_code=bool(hf.get("trust_remote_code", False)),
-            )
-        else:
-            raise ValueError(f"Unknown backend: {backend}")
+        # Load Ollama chat model (phi4)
+        self.llm = OllamaClient(
+            model=self.cfg["models"]["ollama"],   # phi4
+            host=self.cfg["ollama"]["host"],
+            params=self.cfg.get("params", {}),
+        )
+
+        # Load BGE-M3 embedding model
+        self.embedder = SentenceTransformer("BAAI/bge-m3")
+
+    def _embed(self, text: str) -> List[float]:
+        """Generate embeddings using BGE-M3"""
+        return self.embedder.encode(text).tolist()
 
     def _build_messages(self, user_input: str) -> List[Message]:
         """
@@ -57,11 +46,8 @@ class ChatRunner:
         """
         system = {"role": "system", "content": self.pm.system_prompt()}
 
-        # Generate embedding for current input
-        query_embedding = self.llm.embed(user_input)
-
-        # Retrieve relevant history from Postgres (by embedding similarity)
-        history = self.mem.relevant_history(query_embedding, limit=10)
+        # Retrieve relevant history using embeddings
+        history = self.mem.relevant_history(user_input, limit=10)
 
         current = {"role": "user", "content": user_input}
         return [system, *history, current]
@@ -69,6 +55,7 @@ class ChatRunner:
     def ask(self, user_input: str, stream: bool = True) -> str:
         messages = self._build_messages(user_input)
 
+        # Chat via phi4
         if stream:
             chunks = []
             for token in self.llm.stream(messages):
@@ -80,11 +67,11 @@ class ChatRunner:
             answer = self.llm.complete(messages)
             print(answer)
 
-        # Save user + assistant messages with embeddings
-        user_embedding = self.llm.embed(user_input)
+        # Save messages with embeddings (BGE-M3)
+        user_embedding = self._embed(user_input)
         self.mem.add("user", user_input, user_embedding)
 
-        answer_embedding = self.llm.embed(answer)
+        answer_embedding = self._embed(answer)
         self.mem.add("assistant", answer, answer_embedding)
 
         return answer
