@@ -1,0 +1,36 @@
+2025-08-23 19:02:26,619 - root - INFO - Initializing memory system...
+2025-08-23 19:02:26,691 - root - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-08-23 19:02:26,704 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-08-23 19:02:26,704 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-08-23 19:02:55,815 - root - INFO - Memory initialized with sentence-transformers/all-MiniLM-L6-v2
+2025-08-23 19:02:55,816 - root - INFO - Ollama client initialized with model: qwen2.5:1.5b
+2025-08-23 19:02:55,816 - root - INFO - ChatRunner initialized successfully
+2025-08-23 19:03:01,339 - root - ERROR - Error loading system prompt: [Errno 2] No such file or directory: 'prompts/system.txt'
+2025-08-23 19:04:09,864 - root - INFO - Initializing memory system...
+2025-08-23 19:04:09,931 - root - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-08-23 19:04:09,937 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-08-23 19:04:09,937 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-08-23 19:04:17,137 - root - INFO - Memory initialized with sentence-transformers/all-MiniLM-L6-v2
+2025-08-23 19:04:17,138 - root - INFO - Ollama client initialized with model: qwen2.5:1.5b
+2025-08-23 19:04:17,138 - root - INFO - ChatRunner initialized successfully
+2025-08-23 19:07:04,586 - root - INFO - Initializing memory system...
+2025-08-23 19:07:04,622 - root - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-08-23 19:07:04,623 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-08-23 19:07:04,623 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-08-23 19:07:09,469 - root - INFO - Memory initialized with sentence-transformers/all-MiniLM-L6-v2
+2025-08-23 19:07:09,470 - root - INFO - Ollama client initialized with model: qwen2.5:1.5b
+2025-08-23 19:07:09,470 - root - INFO - ChatRunner initialized successfully
+2025-08-23 19:11:04,757 - root - INFO - Initializing memory system...
+2025-08-23 19:11:04,824 - root - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-08-23 19:11:04,830 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-08-23 19:11:04,830 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-08-23 19:11:09,192 - root - INFO - Memory initialized with sentence-transformers/all-MiniLM-L6-v2
+2025-08-23 19:11:09,193 - root - INFO - Ollama client initialized with model: qwen2.5:1.5b
+2025-08-23 19:11:09,193 - root - INFO - ChatRunner initialized successfully
+2025-08-23 19:19:05,800 - root - INFO - Initializing memory system...
+2025-08-23 19:19:05,826 - root - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-08-23 19:19:05,828 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-08-23 19:19:05,829 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-08-23 19:19:11,199 - root - INFO - Memory initialized with sentence-transformers/all-MiniLM-L6-v2
+2025-08-23 19:19:11,199 - root - INFO - Ollama client initialized with model: qwen2.5:1.5b
+2025-08-23 19:19:11,199 - root - INFO - ChatRunner initialized successfully

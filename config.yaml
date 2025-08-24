@@ -1,39 +1,76 @@
-# Select backend: "ollama" or "huggingface"
-backend: ollama
+# Advanced P.A.R.T.H Configuration
+# All parameters configurable - NO HARDCODING
 
-# Common generation params (applied if supported by backend)
+# Backend Selection
+backend: ollama  # Options: "ollama", "huggingface"
+
+# Generation Parameters
 params:
   temperature: 0.2
   top_p: 0.9
   max_tokens: 1024
   seed: 7
 
-# Model names per backend
+# Model Configuration
 models:
-  ollama: "phi4:latest"      # e.g., phi4, phi4:14b, qwen:14b-instruct, mistral-nemo, llama3.3:70b-instruct
-  huggingface: "microsoft/phi-4" # swap to any HF chat/instruct model
-  embedding: BAAI/bge-m3 
+  ollama: "qwen2.5:1.5b"
+  huggingface: "microsoft/phi-4"
+  embedding: "sentence-transformers/all-MiniLM-L6-v2"
 
-# Files (no hardcoded prompts)
+# File Paths
 prompts:
   system: ./prompts/system.txt
-  tools: ./prompts/tools.md # optional; you can remove if unused
+  tools: ./prompts/tools.md
 
-# Memory store (embedding-based recall only)
+# Database Configuration
+database:
+  provider: postgresql  # Future: support sqlite, mysql
+  connection:
+    dbname: parthdb
+    user: parth_user
+    password: parth123
+    host: localhost
+    port: 5432
+    timeout: 30
+
+# Memory/Embedding Configuration
 memory:
-  dbname: parthdb
-  user: parth_user
-  password: Owlfitter
-  host: localhost
   session_id: default
-  embedding_dim: 1024 
+  embedding_dim: 384
+  similarity_threshold: 1.5  # Increased from 0.7 to include more results
+  max_history_retrieval: 10
+  enable_similarity_search: true
 
-# Ollama settings
+# Ollama Configuration
 ollama:
   host: "http://127.0.0.1:11434"
+  timeout: 600
+  stream: true
 
-# Hugging Face (only used if backend = huggingface)
+# Hugging Face Configuration
 huggingface:
-  dtype: "auto" # or float16/bfloat16
-  device: "auto" # "cuda", "cpu", or index like "cuda:0"
-  trust_remote_code: false # set to true if using custom models with custom code
+  dtype: "auto"
+  device: "auto"
+  trust_remote_code: false
+  cache_dir: "./hf_cache"
+  torch_dtype: "float16"
+
+# Performance Settings
+performance:
+  enable_garbage_collection: true
+  memory_limit_mb: 4096
+  batch_size: 1
+  parallel_processing: false
+
+# Logging Configuration
+logging:
+  level: INFO  # DEBUG, INFO, WARNING, ERROR
+  file: ./logs/parth.log
+  max_file_size_mb: 10
+  backup_count: 3
+
+# Security Settings
+security:
+  max_input_length: 4096
+  rate_limit_per_minute: 60
+  sanitize_input: true
