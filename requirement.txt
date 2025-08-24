@@ -7,3 +7,5 @@ torch
 transformers
 numpy
 ollama
+ultralytics
+opencv-python

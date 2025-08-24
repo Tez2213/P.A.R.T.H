@@ -15,6 +15,9 @@ class ChatRunner:
         Initialize ChatRunner with complete config-driven approach.
         Zero hardcoding - everything configurable.
         """
+        # Store config path for vision system
+        self.cfg_path = cfg_path
+        
         # Load configuration
         self.cfg = self._load_config(cfg_path)
         
@@ -28,8 +31,9 @@ class ChatRunner:
         self._init_prompt_manager()
         self._init_memory()
         self._init_llm()
+        self._init_vision()
         
-        logging.info("ChatRunner initialized successfully")
+        logging.debug("ChatRunner initialized successfully")
 
     def _load_config(self, cfg_path: str) -> dict:
         """Load and validate configuration."""
@@ -87,12 +91,12 @@ class ChatRunner:
 
     def _init_memory(self):
         """Initialize memory with shared embedding model."""
-        logging.info("Initializing memory system...")
+        logging.debug("Initializing memory system...")
         self.mem = PostgresMemory(self.cfg)
         
         # Share the embedding model to prevent duplicate loading
         self.embedder = self.mem.model
-        logging.info(f"Memory initialized with {self.cfg['models']['embedding']}")
+        logging.debug(f"Memory initialized with {self.cfg['models']['embedding']}")
 
     def _init_llm(self):
         """Initialize LLM based on backend configuration."""
@@ -104,12 +108,66 @@ class ChatRunner:
                 host=self.cfg["ollama"]["host"],
                 params=self.cfg.get("params", {})
             )
-            logging.info(f"Ollama client initialized with model: {self.cfg['models']['ollama']}")
+            logging.debug(f"Ollama client initialized with model: {self.cfg['models']['ollama']}")
         elif backend == "huggingface":
             # Future: implement HuggingFace client
             raise NotImplementedError("HuggingFace backend not yet implemented")
         else:
             raise ValueError(f"Unsupported backend: {backend}")
+
+    def _init_vision(self):
+        """Initialize vision system if enabled."""
+        vision_config = self.cfg.get("vision", {})
+        if vision_config.get("enabled", False):
+            try:
+                # Configure ultralytics logging based on vision config
+                vision_logging = vision_config.get("logging", {})
+                if vision_logging.get("suppress_ultralytics", True):
+                    import os
+                    import warnings
+                    os.environ['YOLO_VERBOSE'] = 'False'
+                    os.environ['ULTRALYTICS_VERBOSE'] = 'False'
+                    warnings.filterwarnings('ignore', category=UserWarning, module='ultralytics')
+                
+                # Import vision system
+                import sys
+                sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+                from vision.vision import FastVision
+                
+                # Set ultralytics logging level
+                import logging as ultralytics_logging
+                ultralytics_log_level = vision_logging.get("log_level", "ERROR").upper()
+                ultralytics_logging.getLogger('ultralytics').setLevel(getattr(ultralytics_logging, ultralytics_log_level))
+                
+                self.vision = FastVision(self.cfg_path if hasattr(self, 'cfg_path') else "config.yaml")
+                
+                # Set up vision callback to update memory with visual observations
+                self.vision.set_vision_callback(self._on_vision_update)
+                
+                # Start background vision processing
+                self.vision.start_background_vision()
+                
+                logging.debug("Vision system initialized and started")
+            except Exception as e:
+                logging.error(f"Failed to initialize vision system: {e}")
+                self.vision = None
+        else:
+            self.vision = None
+            logging.debug("Vision system disabled in config")
+
+    def _on_vision_update(self, description: str, detections: List):
+        """Callback for vision updates - store in memory for context."""
+        try:
+            # Create a vision context message
+            vision_context = f"[VISION UPDATE] {description}"
+            
+            # Store in memory with embedding for retrieval
+            vision_embedding = self._embed(vision_context)
+            self.mem.add("system", vision_context, vision_embedding)
+            
+            logging.debug(f"Vision update stored: {description}")
+        except Exception as e:
+            logging.error(f"Error storing vision update: {e}")
 
     def _embed(self, text: str) -> List[float]:
         """Generate embeddings using shared model."""
@@ -124,7 +182,17 @@ class ChatRunner:
             raise ValueError(f"Input too long: {len(user_input)} > {max_length}")
         
         # System prompt
-        system = {"role": "system", "content": self.pm.system_prompt()}
+        system_content = self.pm.system_prompt()
+        
+        # Add current vision context if available and user asks about vision
+        vision_keywords = ["see", "look", "vision", "camera", "what", "show", "view", "observe", "visual"]
+        if self.vision and any(keyword in user_input.lower() for keyword in vision_keywords):
+            current_vision = self.vision.get_current_vision()
+            if current_vision["enabled"] and current_vision["description"]:
+                vision_context = f"\n\nCURRENT VISION: {current_vision['description']}"
+                system_content += vision_context
+        
+        system = {"role": "system", "content": system_content}
 
         # Retrieve relevant history using configured parameters
         history = self.mem.relevant_history(user_input)
@@ -173,7 +241,7 @@ class ChatRunner:
 
     def get_stats(self) -> dict:
         """Get session statistics."""
-        return {
+        stats = {
             "config": {
                 "backend": self.cfg.get("backend"),
                 "model": self.cfg["models"][self.cfg.get("backend", "ollama")],
@@ -181,22 +249,76 @@ class ChatRunner:
             },
             "memory": self.mem.get_session_stats()
         }
+        
+        # Add vision stats if available
+        if hasattr(self, 'vision') and self.vision:
+            vision_state = self.vision.get_current_vision()
+            stats["vision"] = {
+                "enabled": vision_state["enabled"],
+                "model_type": vision_state["model_type"],
+                "current_detections": len(vision_state["detections"]),
+                "description": vision_state["description"]
+            }
+        
+        return stats
 
     def clear_memory(self):
         """Clear current session memory."""
         self.mem.clear_session()
         logging.info("Session memory cleared")
 
+    def stop_vision(self):
+        """Stop vision system."""
+        if hasattr(self, 'vision') and self.vision:
+            self.vision.stop()
+            logging.info("Vision system stopped")
+
+    def get_vision_description(self) -> str:
+        """Get current vision description for manual queries."""
+        if hasattr(self, 'vision') and self.vision:
+            return self.vision.capture_frame_description()
+        return "Vision system is not available."
+
 
 if __name__ == "__main__":
     runner = ChatRunner("config.yaml")
-    print("Hello! My name is PARTH. How can I help you?\n")
+    print("Hello! My name is PARTH. How can I help you?")
+    print("I can see through my camera! Ask me 'what do you see?' to know what I'm looking at.")
+    print("Type 'exit' to quit, 'stats' for system info, or 'vision' to check my vision status.\n")
 
-    while True:
-        user_input = input("You: ")
-        if user_input.strip().lower() in {"exit", "quit"}:
-            print("\n👋 Goodbye!")
-            break
-        print("Bot: ", end="")
-        runner.ask(user_input, stream=True)
-        print()
+    try:
+        while True:
+            user_input = input("You: ").strip()
+            
+            if user_input.lower() in {"exit", "quit"}:
+                print("\n👋 Goodbye!")
+                runner.stop_vision()  # Clean shutdown of vision
+                break
+            elif user_input.lower() == "stats":
+                stats = runner.get_stats()
+                print(f"\n📊 System Stats:")
+                print(f"Backend: {stats['config']['backend']}")
+                print(f"Model: {stats['config']['model']}")
+                print(f"Memory: {stats['memory']['message_count']} messages")
+                if 'vision' in stats:
+                    print(f"Vision: {stats['vision']['model_type']} ({'enabled' if stats['vision']['enabled'] else 'disabled'})")
+                    if stats['vision']['enabled'] and stats['vision']['description']:
+                        print(f"Current view: {stats['vision']['description']}")
+                print()
+                continue
+            elif user_input.lower() == "vision":
+                vision_desc = runner.get_vision_description()
+                print(f"👁️  Vision Status: {vision_desc}\n")
+                continue
+            elif not user_input:
+                continue
+                
+            print("PARTH: ", end="")
+            runner.ask(user_input, stream=True)
+            print()
+    except KeyboardInterrupt:
+        print("\n\n👋 Goodbye!")
+        runner.stop_vision()
+    except Exception as e:
+        print(f"\n❌ Error: {e}")
+        runner.stop_vision()

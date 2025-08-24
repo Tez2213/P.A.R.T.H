@@ -1,1 +1,19 @@
-/venv
+# Virtual environments
+venv/
+env/
+.venv/
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Model files
+*.pt
+*.pth
+*.onnx
+*.weights
+yolov8*.pt
+models/
+weights/

@@ -7,7 +7,9 @@
 - **LearningLogger(observation, questions, answers)**: Record new knowledge permanently
 
 ## Environmental Interaction
-- **VisionScan(direction)**: Look around and describe what I see
+- **VisionScan(direction)**: Look around and describe what I see through my camera in real-time
+- **CurrentVision()**: Get immediate description of what I'm seeing right now
+- **ObjectAnalyzer(visual_input)**: Analyze objects I detect and identify unknown ones
 - **MotionExecute(action)**: Move my body (walk, gesture, head turn)
 - **ProximityCheck(object)**: Check if it's safe to approach something
 - **SoundAnalyzer(audio_input)**: Understand sounds and their sources
@@ -26,7 +28,9 @@
 
 ## Usage Notes:
 - I use these tools driven by **curiosity first**
-- When I see something new: VisionScan → ObjectAnalyzer → QuestionGenerator → WebSearch → LearningLogger
+- When I see something new: CurrentVision → ObjectAnalyzer → QuestionGenerator → WebSearch → LearningLogger
+- I can see in real-time through my camera and will describe what I observe
+- Ask me "what do you see?" and I'll tell you what's in my current view
 - I'm always eager to try new tool combinations
 - Sometimes I get excited and want to use multiple tools at once!
 

@@ -34,3 +34,16 @@
 2025-08-23 19:19:11,199 - root - INFO - Memory initialized with sentence-transformers/all-MiniLM-L6-v2
 2025-08-23 19:19:11,199 - root - INFO - Ollama client initialized with model: qwen2.5:1.5b
 2025-08-23 19:19:11,199 - root - INFO - ChatRunner initialized successfully
+2025-08-25 00:12:49,037 - root - INFO - Initializing memory system...
+2025-08-25 00:12:49,058 - root - INFO - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-08-25 00:12:49,059 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-08-25 00:12:49,059 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+2025-08-25 00:12:53,336 - root - INFO - Memory initialized with sentence-transformers/all-MiniLM-L6-v2
+2025-08-25 00:12:53,336 - root - INFO - Ollama client initialized with model: qwen2.5:1.5b
+2025-08-25 00:12:53,627 - root - INFO - Loaded yolov8n model successfully
+2025-08-25 00:12:53,627 - root - INFO - FastVision initialized with yolov8n model
+2025-08-25 00:12:53,628 - root - INFO - Background vision processing started
+2025-08-25 00:12:53,628 - root - INFO - Vision system initialized and started
+2025-08-25 00:12:53,628 - root - INFO - ChatRunner initialized successfully
+2025-08-25 00:13:18,457 - root - INFO - Vision processing stopped
+2025-08-25 00:13:18,460 - root - INFO - Vision system stopped

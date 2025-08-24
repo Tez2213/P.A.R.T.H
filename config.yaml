@@ -64,10 +64,35 @@ performance:
 
 # Logging Configuration
 logging:
-  level: INFO  # DEBUG, INFO, WARNING, ERROR
+  level: WARNING  # Only show warnings and errors, suppress INFO and DEBUG
   file: ./logs/parth.log
   max_file_size_mb: 10
   backup_count: 3
+
+# Vision Configuration
+vision:
+  enabled: true
+  model_type: "yolov8n"  # Options: yolov8n, yolov8s, mobilenet
+  model_path: "./yolov8n.pt"
+  real_time: true
+  logging:
+    suppress_ultralytics: true  # Suppress YOLO batch progress bars
+    suppress_model_loading: true  # Suppress model loading output
+    suppress_inference: true  # Suppress inference progress bars
+    show_fps: false  # Show FPS counter in terminal
+    log_level: "ERROR"  # Logging level for vision system
+  camera:
+    source: 0  # Webcam source (0 for default camera)
+    width: 640
+    height: 480
+    fps: 30
+  detection:
+    confidence_threshold: 0.5
+    max_detections: 10
+  performance:
+    frame_skip: 1  # Process every nth frame for better performance
+    resize_input: true
+    use_gpu: false  # Set to true if GPU available
 
 # Security Settings
 security:
