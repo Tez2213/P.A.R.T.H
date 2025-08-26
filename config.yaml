@@ -72,7 +72,7 @@ logging:
 # Vision Configuration
 vision:
   enabled: true
-  model_type: "yolov8n"  # Options: yolov8n, yolov8s, mobilenet
+  model_type: "yolo11n"  # Options: yolov8n, yolov8s, mobilenet
   model_path: "./yolov8n.pt"
   real_time: true
   logging:
